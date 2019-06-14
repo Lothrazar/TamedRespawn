@@ -2,7 +2,7 @@
 {
   "modid": "tamedrespawn",
   "name": "Tamed Respawn",
-  "description": "Tamed animals respawn near you if they can.",
+  "description": "If a horse or pet dies when the owner is nearby and online, it will respawn for you.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
