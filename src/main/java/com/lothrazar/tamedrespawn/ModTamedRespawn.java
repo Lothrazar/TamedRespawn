@@ -81,6 +81,7 @@ public class ModTamedRespawn {
         event.setCanceled(true);
         EntityPlayer player = (EntityPlayer) owner;
         healAndRespawn(tamed, player);
+        //        tamed.setSitting(true);
         if (doChat) {
           player.sendStatusMessage(new TextComponentTranslation(I18n.translateToLocal(MODID + ".tamed.message")), true);
         }
