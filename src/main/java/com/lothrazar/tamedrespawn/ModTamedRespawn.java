@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod(modid = ModTamedRespawn.MODID, certificateFingerprint = "@FINGERPRINT@")
+@Mod(modid = ModTamedRespawn.MODID, certificateFingerprint = "@FINGERPRINT@", updateJSON = "https://raw.githubusercontent.com/Lothrazar/TamedRespawn/master/update.json")
 public class ModTamedRespawn {
 
   public static final String MODID = "tamedrespawn";
