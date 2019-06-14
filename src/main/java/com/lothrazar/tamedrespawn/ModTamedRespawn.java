@@ -9,6 +9,7 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -81,7 +82,7 @@ public class ModTamedRespawn {
         EntityPlayer player = (EntityPlayer) owner;
         healAndRespawn(tamed, player);
         if (doChat) {
-          player.sendStatusMessage(new TextComponentTranslation(MODID + ".tamed.message"), true);
+          player.sendStatusMessage(new TextComponentTranslation(I18n.translateToLocal(MODID + ".tamed.message")), true);
         }
       }
     }
@@ -94,7 +95,7 @@ public class ModTamedRespawn {
           event.setCanceled(true);
           healAndRespawn(horse, player);
           if (doChat) {
-            player.sendStatusMessage(new TextComponentTranslation(MODID + ".horse.message"), true);
+            player.sendStatusMessage(new TextComponentTranslation(I18n.translateToLocal(MODID + ".horse.message")), true);
           }
         }
       }
