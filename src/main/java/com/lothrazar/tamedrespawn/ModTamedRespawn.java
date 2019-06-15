@@ -13,6 +13,7 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -28,6 +29,8 @@ public class ModTamedRespawn {
   private boolean doWeakness;
   private boolean doChat;
   private boolean doRegen;
+  private boolean blockBreedingHorses;
+  private boolean blockBreedingPets;
 
   @EventHandler
   public void preInit(FMLPreInitializationEvent event) {
@@ -38,13 +41,14 @@ public class ModTamedRespawn {
     doWeakness = config.getBoolean("weakness", category, true, "Apply weakness on revival");
     doRegen = config.getBoolean("regen", category, true, "Apply regen on revival");
     doChat = config.getBoolean("chatMessages", category, true, "Send chat popup on revival");
+    blockBreedingHorses = config.getBoolean("blockBreedingHorses", category, true, "If true no breeding will happen");
+    blockBreedingPets = config.getBoolean("blockBreedingPets", category, true, "If true no breeding will happen");
     config.save();
     MinecraftForge.EVENT_BUS.register(this);
   }
 
   private void healAndRespawn(EntityLivingBase tamed, EntityPlayer owner) {
     BlockPos pos = owner.getPosition();
-    World world = tamed.world;
     tamed.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
     tamed.heal(tamed.getMaxHealth());
     tamed.setHealth(tamed.getMaxHealth());
@@ -66,6 +70,17 @@ public class ModTamedRespawn {
     //          0.5 + randx * randz,
     //          randz);
     //    }
+  }
+
+  @SubscribeEvent
+  public void onBabyEntitySpawnEvent(BabyEntitySpawnEvent event) {
+    //then you cannot breed horses or wolves
+    if (blockBreedingHorses && event.getChild() instanceof AbstractHorse) {
+      event.setCanceled(true);
+    }
+    if (blockBreedingPets && event.getChild() instanceof EntityTameable) {
+      event.setCanceled(true);
+    }
   }
 
   @SubscribeEvent
