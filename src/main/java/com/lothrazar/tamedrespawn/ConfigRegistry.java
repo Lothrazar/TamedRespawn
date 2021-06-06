@@ -2,9 +2,12 @@ package com.lothrazar.tamedrespawn;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
+import com.lothrazar.tamedrespawn.util.UtilString;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -15,23 +18,32 @@ public class ConfigRegistry {
   private static ForgeConfigSpec COMMON_CONFIG;
   public static BooleanValue DOCHAT;
   private static ConfigValue<List<? extends String>> EFFECTS;
-  //  private static ConfigValue<List<? extends String>> ENTITIES;
+  private static ConfigValue<List<? extends String>> ENTITIES;
+  public static BooleanValue DOHEAL;
+  public static BooleanValue DOTP;
+  public static ConfigValue<String> ITEMREVIEV;
   static {
     initConfig();
   }
 
   private static void initConfig() {
     CFG.push(ModTamedRespawn.MODID);
+    ITEMREVIEV = CFG.comment("\r\nItem that gives extra lives to your pets")
+        .define("itemExtraLives", "minecraft:rabbit_stew");
     //
-    DOCHAT = CFG.comment("Send chat popup on revival").define("message", true);
+    DOCHAT = CFG.comment("\r\nSend chat popup on revival").define("doMessage", true);
+    DOHEAL = CFG.comment("\r\nSend chat popup on revival").define("doHeal", true);
+    DOTP = CFG.comment("\r\nSend chat popup on revival").define("doTeleport", true);
     //
     ArrayList<String> ptns = new ArrayList<String>();
     ptns.add("minecraft:regeneration");
     ptns.add("minecraft:weakness");
-    EFFECTS = CFG.comment("Potions applied after tamed respawn").defineList("potions", ptns, it -> it instanceof String);
+    EFFECTS = CFG.comment("\r\nPotions applied after tamed respawn").defineList("doPotions", ptns, it -> it instanceof String);
     ArrayList<String> ents = new ArrayList<String>();
-    //    ENTITIES = CFG.comment("Entities to block for respawning, each entry must look like \"minecraft:horse\".  (will fail unless entity exists and is tamed by a valid player)")
-    //        .defineList("ignoredEntities", ents, it -> it instanceof String);
+    ents.add("minecraft:mule");
+    ENTITIES = CFG.comment("\r\nEntities to block for respawning, each entry must look like \"minecraft:horse\".  "
+        + "By default compatible tamed entities are always affected by this mod unless listed here")
+        .defineList("ignoredEntities", ents, it -> it instanceof String);
     //
     CFG.pop();
     COMMON_CONFIG = CFG.build();
@@ -48,10 +60,14 @@ public class ConfigRegistry {
   }
 
   @SuppressWarnings("unchecked")
+  public static boolean isEntityIgnored(Entity in) {
+    ResourceLocation inId = in.getType().getRegistryName();
+    List<String> entities = (List<String>) ENTITIES.get();
+    return UtilString.isInList(entities, inId);
+  }
+
+  @SuppressWarnings("unchecked")
   public static List<String> potionIds() {
     return (List<String>) EFFECTS.get();
   }
-  //    doWeakness = config.getBoolean("weakness", category, true, "Apply weakness on revival");
-  //    doRegen = config.getBoolean("regen", category, true, "Apply regen on revival");
-  //    doChat = config.getBoolean("chatMessages", category, true, "Send chat popup on revival");
 }
