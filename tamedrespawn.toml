@@ -1,0 +1,21 @@
+
+[tamedrespawn]
+	#
+	#Send chat popup on revival
+	doHeal = true
+	#
+	#Send chat popup on revival
+	doTeleport = true
+	#
+	#Entities to block for respawning, each entry must look like "minecraft:horse".  By default compatible tamed entities are always affected by this mod unless listed here
+	ignoredEntities = ["minecraft:mule"]
+	#
+	#Potions applied after tamed respawn
+	doPotions = ["minecraft:regeneration", "minecraft:weakness"]
+	#
+	#Item that gives extra lives to your pets
+	itemExtraLives = "minecraft:rabbit_stew"
+	#
+	#Send chat popup on revival
+	doMessage = true
+
