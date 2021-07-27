@@ -25,7 +25,7 @@ package com.lothrazar.tamedrespawn.util;
 //package com.lothrazar.cyclic.util;
 
 import java.util.List;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class UtilString {
 

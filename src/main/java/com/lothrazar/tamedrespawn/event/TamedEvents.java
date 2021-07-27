@@ -2,20 +2,20 @@ package com.lothrazar.tamedrespawn.event;
 
 import com.lothrazar.tamedrespawn.ConfigRegistry;
 import com.lothrazar.tamedrespawn.ModTamedRespawn;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,24 +32,24 @@ public class TamedEvents {
     if (ConfigRegistry.isEntityIgnored(entity)) {
       return;
     }
-    World world = entity.world;
-    if (hasLives(entity) && entity instanceof TameableEntity) {
-      TameableEntity tamed = (TameableEntity) entity;
+    Level world = entity.level;
+    if (hasLives(entity) && entity instanceof TamableAnimal) {
+      TamableAnimal tamed = (TamableAnimal) entity;
       LivingEntity owner = tamed.getOwner();
-      if (tamed.isTamed() && owner != null
+      if (tamed.isTame() && owner != null
           && haveSameDimension(tamed, owner)
-          && owner instanceof PlayerEntity) {
+          && owner instanceof Player) {
         event.setCanceled(true);
-        PlayerEntity player = (PlayerEntity) owner;
+        Player player = (Player) owner;
         healAndRespawn(tamed, player);
-        tamed.func_233687_w_(true); // TODO: mappings setSitting
+        tamed.setOrderedToSit(true); // TODO: mappings setSitting
         this.sendDeathChat(player, ModTamedRespawn.MODID + ".tamed.message", tamed);
       }
     }
-    else if (entity instanceof AbstractHorseEntity) {
-      AbstractHorseEntity horse = (AbstractHorseEntity) entity;
-      if (horse.getOwnerUniqueId() != null) {
-        PlayerEntity player = world.getPlayerByUuid(horse.getOwnerUniqueId());
+    else if (entity instanceof AbstractHorse) {
+      AbstractHorse horse = (AbstractHorse) entity;
+      if (horse.getOwnerUUID() != null) {
+        Player player = world.getPlayerByUUID(horse.getOwnerUUID());
         if (player != null && haveSameDimension(horse, player)) {
           event.setCanceled(true);
           healAndRespawn(horse, player);
@@ -59,31 +59,31 @@ public class TamedEvents {
     }
   }
 
-  private void sendDeathChat(PlayerEntity player, String string, Entity ent) {
+  private void sendDeathChat(Player player, String string, Entity ent) {
     String petname = ent.getDisplayName().getString();
     if (ConfigRegistry.DOCHAT.get()) {
-      TranslationTextComponent t = new TranslationTextComponent(string);
-      t.mergeStyle(TextFormatting.LIGHT_PURPLE);
+      TranslatableComponent t = new TranslatableComponent(string);
+      t.withStyle(ChatFormatting.LIGHT_PURPLE);
       if (petname != null) {
-        t.appendString(" " + petname);
+        t.append(" " + petname);
       }
-      player.sendStatusMessage(t, false);
+      player.displayClientMessage(t, false);
       //lives remaining text
-      t = new TranslationTextComponent("tamedrespawn.howmany");
-      t.mergeStyle(TextFormatting.DARK_PURPLE);
-      player.sendStatusMessage((new StringTextComponent("[" + getLives(ent) + "]")).append(t).mergeStyle(TextFormatting.DARK_PURPLE), false);
+      t = new TranslatableComponent("tamedrespawn.howmany");
+      t.withStyle(ChatFormatting.DARK_PURPLE);
+      player.displayClientMessage((new TextComponent("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE), false);
     }
   }
 
-  private void sendGiveChat(PlayerEntity player, String string, Entity ent) {
+  private void sendGiveChat(Player player, String string, Entity ent) {
     if (ConfigRegistry.DOCHAT.get()) {
-      TranslationTextComponent t = new TranslationTextComponent(string);
-      t.mergeStyle(TextFormatting.LIGHT_PURPLE);
-      player.sendStatusMessage(t, false);
+      TranslatableComponent t = new TranslatableComponent(string);
+      t.withStyle(ChatFormatting.LIGHT_PURPLE);
+      player.displayClientMessage(t, false);
       //lives remaining text
-      t = new TranslationTextComponent("tamedrespawn.howmany");
-      t.mergeStyle(TextFormatting.DARK_PURPLE);
-      player.sendStatusMessage((new StringTextComponent("[" + getLives(ent) + "]")).append(t).mergeStyle(TextFormatting.DARK_PURPLE), false);
+      t = new TranslatableComponent("tamedrespawn.howmany");
+      t.withStyle(ChatFormatting.DARK_PURPLE);
+      player.displayClientMessage((new TextComponent("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE), false);
     }
   }
 
@@ -93,9 +93,9 @@ public class TamedEvents {
     if (ConfigRegistry.isEntityIgnored(target)) {
       return;
     }
-    PlayerEntity player = event.getPlayer();
+    Player player = event.getPlayer();
     ItemStack held = event.getItemStack();
-    if (!player.world.isRemote && isLifeGain(held) && target instanceof LivingEntity) {
+    if (!player.level.isClientSide && isLifeGain(held) && target instanceof LivingEntity) {
       gainLife((LivingEntity) target);
       this.sendGiveChat(player, ModTamedRespawn.MODID + ".tamed.gained", target);
     }
@@ -105,23 +105,23 @@ public class TamedEvents {
     return held.getItem().getRegistryName().toString().equalsIgnoreCase(ConfigRegistry.ITEMREVIEV.get());
   }
 
-  private void healAndRespawn(LivingEntity tamed, PlayerEntity owner) {
+  private void healAndRespawn(LivingEntity tamed, Player owner) {
     consumeLife(tamed);
     if (ConfigRegistry.DOTP.get()) {
-      BlockPos pos = owner.getPosition();
-      tamed.setPositionAndUpdate(pos.getX(), pos.getY(), pos.getZ());
+      BlockPos pos = owner.blockPosition();
+      tamed.teleportTo(pos.getX(), pos.getY(), pos.getZ());
     }
     if (ConfigRegistry.DOHEAL.get()) {
       tamed.heal(tamed.getMaxHealth());
       tamed.setHealth(tamed.getMaxHealth());
-      tamed.clearActivePotions();
-      tamed.extinguish();
+      tamed.removeAllEffects();
+      tamed.clearFire();
     }
     //apply potion effects - possibly empty
     for (String reg : ConfigRegistry.potionIds()) {
-      Effect eff = ForgeRegistries.POTIONS.getValue(ResourceLocation.tryCreate(reg));
+      MobEffect eff = ForgeRegistries.POTIONS.getValue(ResourceLocation.tryParse(reg));
       if (eff != null) {
-        tamed.addPotionEffect(new EffectInstance(eff, 30, 1));
+        tamed.addEffect(new MobEffectInstance(eff, 30, 1));
       }
     }
   }
@@ -153,12 +153,12 @@ public class TamedEvents {
     tamed.getPersistentData().putInt(NBT_LIVES, lv);
   }
 
-  public static String dimensionToString(World world) {
+  public static String dimensionToString(Level world) {
     //example: returns "minecraft:overworld" resource location
-    return world.getDimensionKey().getLocation().toString();
+    return world.dimension().location().toString();
   }
 
   private boolean haveSameDimension(LivingEntity tamed, LivingEntity owner) {
-    return dimensionToString(tamed.world).equalsIgnoreCase(dimensionToString(owner.world));
+    return dimensionToString(tamed.level).equalsIgnoreCase(dimensionToString(owner.level));
   }
 }
