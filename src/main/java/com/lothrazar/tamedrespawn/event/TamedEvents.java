@@ -119,7 +119,7 @@ public class TamedEvents {
     }
     //apply potion effects - possibly empty
     for (String reg : ConfigRegistry.potionIds()) {
-      MobEffect eff = ForgeRegistries.POTIONS.getValue(ResourceLocation.tryParse(reg));
+      MobEffect eff = ForgeRegistries.MOB_EFFECTS.getValue(ResourceLocation.tryParse(reg));
       if (eff != null) {
         tamed.addEffect(new MobEffectInstance(eff, 30, 1));
       }
