@@ -1,0 +1,10 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:rabbit_stew",
+		{
+			"id": "cyclic:heart_empty",
+			"required": false
+		}
+	]
+}

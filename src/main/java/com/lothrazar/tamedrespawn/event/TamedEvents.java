@@ -2,19 +2,21 @@ package com.lothrazar.tamedrespawn.event;
 
 import com.lothrazar.tamedrespawn.ConfigRegistry;
 import com.lothrazar.tamedrespawn.ModTamedRespawn;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
@@ -62,28 +64,28 @@ public class TamedEvents {
   private void sendDeathChat(Player player, String string, Entity ent) {
     String petname = ent.getDisplayName().getString();
     if (ConfigRegistry.DOCHAT.get()) {
-      TranslatableComponent t = new TranslatableComponent(string);
+      MutableComponent t = Component.translatable(string);
       t.withStyle(ChatFormatting.LIGHT_PURPLE);
       if (petname != null) {
         t.append(" " + petname);
       }
       player.displayClientMessage(t, false);
       //lives remaining text
-      t = new TranslatableComponent("tamedrespawn.howmany");
+      t = Component.translatable("tamedrespawn.howmany");
       t.withStyle(ChatFormatting.DARK_PURPLE);
-      player.displayClientMessage((new TextComponent("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE), false);
+      player.displayClientMessage((Component.literal("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE), false);
     }
   }
 
   private void sendGiveChat(Player player, String string, Entity ent) {
     if (ConfigRegistry.DOCHAT.get()) {
-      TranslatableComponent t = new TranslatableComponent(string);
+      MutableComponent t = Component.translatable(string);
       t.withStyle(ChatFormatting.LIGHT_PURPLE);
       player.displayClientMessage(t, false);
       //lives remaining text
-      t = new TranslatableComponent("tamedrespawn.howmany");
+      t = Component.translatable("tamedrespawn.howmany");
       t.withStyle(ChatFormatting.DARK_PURPLE);
-      player.displayClientMessage((new TextComponent("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE), false);
+      player.displayClientMessage((Component.literal("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE), false);
     }
   }
 
@@ -97,12 +99,15 @@ public class TamedEvents {
     ItemStack held = event.getItemStack();
     if (!player.level.isClientSide && isLifeGain(held) && target instanceof LivingEntity) {
       gainLife((LivingEntity) target);
+      held.shrink(1);
       this.sendGiveChat(player, ModTamedRespawn.MODID + ".tamed.gained", target);
     }
   }
 
+  public static final TagKey<Item> tag = TagKey.create(ForgeRegistries.Keys.ITEMS, new ResourceLocation(ModTamedRespawn.MODID, ModTamedRespawn.MODID));
+
   private boolean isLifeGain(ItemStack held) {
-    return held.getItem().getRegistryName().toString().equalsIgnoreCase(ConfigRegistry.ITEMREVIEV.get());
+    return held.is(tag);
   }
 
   private void healAndRespawn(LivingEntity tamed, Player owner) {

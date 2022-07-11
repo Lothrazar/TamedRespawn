@@ -1,16 +1,17 @@
 package com.lothrazar.tamedrespawn;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
-import com.lothrazar.tamedrespawn.util.UtilString;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.world.entity.Entity;
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.io.WritingMode;
+import com.lothrazar.tamedrespawn.util.UtilString;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ConfigRegistry {
 
@@ -21,15 +22,12 @@ public class ConfigRegistry {
   private static ConfigValue<List<? extends String>> ENTITIES;
   public static BooleanValue DOHEAL;
   public static BooleanValue DOTP;
-  public static ConfigValue<String> ITEMREVIEV;
   static {
     initConfig();
   }
 
   private static void initConfig() {
     CFG.push(ModTamedRespawn.MODID);
-    ITEMREVIEV = CFG.comment("\r\nItem that gives extra lives to your pets")
-        .define("itemExtraLives", "minecraft:rabbit_stew");
     //
     DOCHAT = CFG.comment("\r\nSend chat popup on revival").define("doMessage", true);
     DOHEAL = CFG.comment("\r\nSend chat popup on revival").define("doHeal", true);
@@ -61,7 +59,7 @@ public class ConfigRegistry {
 
   @SuppressWarnings("unchecked")
   public static boolean isEntityIgnored(Entity in) {
-    ResourceLocation inId = in.getType().getRegistryName();
+    ResourceLocation inId = ForgeRegistries.ENTITIES.getKey(in.getType());
     List<String> entities = (List<String>) ENTITIES.get();
     return UtilString.isInList(entities, inId);
   }
