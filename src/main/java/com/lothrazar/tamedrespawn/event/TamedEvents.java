@@ -30,7 +30,7 @@ public class TamedEvents {
 
   @SubscribeEvent
   public void onLivingDeathEvent(LivingDeathEvent event) {
-    LivingEntity entity = event.getEntityLiving();
+    LivingEntity entity = event.getEntity();
     if (ConfigRegistry.isEntityIgnored(entity)) {
       return;
     }
@@ -73,7 +73,8 @@ public class TamedEvents {
       //lives remaining text
       t = Component.translatable("tamedrespawn.howmany");
       t.withStyle(ChatFormatting.DARK_PURPLE);
-      player.displayClientMessage((Component.literal("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE), false);
+      System.out.println("display chat DEATH " + t);
+      player.sendSystemMessage((Component.literal("[" + getLives(ent) + "]")).append(t).withStyle(ChatFormatting.DARK_PURPLE));
     }
   }
 
@@ -95,7 +96,7 @@ public class TamedEvents {
     if (ConfigRegistry.isEntityIgnored(target)) {
       return;
     }
-    Player player = event.getPlayer();
+    Player player = event.getEntity();
     ItemStack held = event.getItemStack();
     if (!player.level.isClientSide && isLifeGain(held) && target instanceof LivingEntity) {
       gainLife((LivingEntity) target);

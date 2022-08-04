@@ -59,7 +59,7 @@ public class ConfigRegistry {
 
   @SuppressWarnings("unchecked")
   public static boolean isEntityIgnored(Entity in) {
-    ResourceLocation inId = ForgeRegistries.ENTITIES.getKey(in.getType());
+    ResourceLocation inId = ForgeRegistries.ENTITY_TYPES.getKey(in.getType());
     List<String> entities = (List<String>) ENTITIES.get();
     return UtilString.isInList(entities, inId);
   }
